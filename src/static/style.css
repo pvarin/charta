@@ -1,0 +1,12 @@
+body {
+    font-family: Sans-Serif;
+}
+
+div.no_charts {
+    margin: 50px;
+    padding: 50px;
+    text-align: center;
+    background-color: rgba(70, 130, 180, .2);
+    color: steelblue;
+    font-size: 2em;
+}

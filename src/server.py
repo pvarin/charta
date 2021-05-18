@@ -1,0 +1,100 @@
+import json
+import pathlib
+import os
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
+import tornado.httpserver
+import zmq
+from zmq.eventloop import zmqstream
+
+from common import DEFAULT_WEB_PORT, DEFAULT_ZMQ_PORT
+
+
+class WebSocketHandler(tornado.websocket.WebSocketHandler):
+    """
+    A simple class to handle WebSockets. Tracks all open WebSockets and provides
+    a static method ofor sending a message to all clients.
+    """
+
+    clients = []
+
+    def check_origin(self, origin):
+        return True
+
+    def open(self):
+        print("connection established")
+        WebSocketHandler.clients.append(self)
+
+    def on_message(self, message):
+
+        pass
+
+    def on_close(self):
+        WebSocketHandler.clients.remove(self)
+        print("connection closed")
+
+    @staticmethod
+    def write_messages(msg):
+        for c in WebSocketHandler.clients:
+            try:
+                c.write_message(msg)
+            except (tornado.websocket.WebSocketClosedError):
+                c.on_close()
+
+
+def handle_zmq_message(stream, msg):
+    """
+    A simple message handler that forwards messages from a ZMQSocket to a WebSocketHandler.
+    """
+    for m in msg:
+        data = json.loads(m)
+        WebSocketHandler.write_messages(m)
+
+    stream.send(b"ok")
+
+
+def setup_client(app, port=DEFAULT_ZMQ_PORT):
+    context = zmq.Context()
+    socket = context.socket(zmq.REP)
+    socket.connect("{protocol}://{host}:{port}".format(protocol="tcp",
+                                                       host="localhost",
+                                                       port=port))
+    print("zmq port: {port}".format(port=port))
+    stream = zmqstream.ZMQStream(socket)
+    stream.on_recv_stream(handle_zmq_message)
+
+
+root = pathlib.Path(__file__).parent.absolute()
+
+
+def make_app():
+    app = tornado.web.Application([
+        (r"/websocket", WebSocketHandler),
+        (r"/(.*)", tornado.web.StaticFileHandler, {
+            "path": os.path.join(root, "static"),
+            "default_filename": "index.html"
+        }),
+    ])
+    return app
+
+
+def try_listen(app, port_range):
+    error = None
+    for port in port_range:
+        try:
+            app.listen(port)
+            print("web port: {}".format(port))
+            return port
+        except OSError as e:
+            error = e
+    raise error
+
+
+if __name__ == "__main__":
+    app = make_app()
+    http_server = tornado.httpserver.HTTPServer(app)
+    port = try_listen(http_server,
+                      range(DEFAULT_WEB_PORT, DEFAULT_WEB_PORT + 10))
+    setup_client(http_server, DEFAULT_ZMQ_PORT)
+    tornado.ioloop.IOLoop.current().start()

@@ -1,1 +1,5 @@
-# dashboard-d3
+# pydashboard
+
+A package for building realtime dashboards. Originally designed for monitoring the progress of optimization problems.
+
+
