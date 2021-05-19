@@ -1,25 +1,34 @@
 var socket = new WebSocket("ws://localhost:" + location.port + "/websocket");
 
-function handle_data(method, data) {
+function handle_data(method, msg) {
 	console.log(`Handling request: ${method}`);
 	if (method == "delete") {
 		global_state.clear();
 		update_charts(d3.select("#charts"), global_state.chart_list());
-	}
-	if (method == "delete_charts") {
+	} else if (method == "delete_series") {
+		global_state.clear_series();
+		update_charts(d3.select("#charts"), global_state.chart_list());
+	} else if (method == "delete_charts") {
 		global_state.clear_charts();
 		update_charts(d3.select("#charts"), global_state.chart_list());
-	}
-	if (method == "read") {
-		return socket.send(JSON.stringify(global_state));
-	}
-	if (method == "create_series") {
-		Series.from_obj(data);
-	}
-
-	if (method == "create_chart") {
-		global_state.add_chart(Chart.from_obj(data));
+	} else if (method == "read") {
+		socket.send(JSON.stringify({
+			"method": "save",
+			"filename": msg.filename,
+			"data": JSON.stringify(global_state)
+		}));
+	} else if (method == "create_series") {
+		Series.from_obj(msg.data);
+	} else if (method == "create_chart") {
+		global_state.add_chart(Chart.from_obj(msg.data));
 		update_charts(d3.select("#charts"), global_state.chart_list());
+	} else if (method == "extend_series") {
+		console.log(msg);
+		global_state.extend_series(msg.key, msg.data);
+	} else if (method == "update") {
+		update_charts(d3.select("#charts"), global_state.chart_list());
+	} else {
+		console.error(`unknown_method:${method}`)
 	}
 	window.localStorage.setItem("context", JSON.stringify(global_state));
 }
@@ -39,7 +48,9 @@ socket.onerror = function(error) {
 
 socket.onmessage = function(e) {
 	let data = JSON.parse(e.data)
-	handle_data(data.method, data.data);
+	let method = data.method;
+	delete data.method
+	handle_data(method, data);
 };
 
 window.onload = function() {

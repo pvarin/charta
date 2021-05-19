@@ -27,8 +27,17 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         WebSocketHandler.clients.append(self)
 
     def on_message(self, message):
-
-        pass
+        data = json.loads(message)
+        method = data["method"]
+        if method == "save":
+            try:
+                print("Saving data to {}".format(data["filename"]))
+                with open(data["filename"], "w") as f:
+                    f.write(data["data"])
+            except Exception as e:
+                print(repr(e))
+        else:
+            print("Unknown method: {}".format(method))
 
     def on_close(self):
         WebSocketHandler.clients.remove(self)

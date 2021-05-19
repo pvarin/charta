@@ -148,11 +148,15 @@ class Context {
 
 	add_chart(chart) {
 		if (this.charts.hasOwnProperty(chart.key)) {
-			console.error(`key_error:chart with the key ${chart.key} already exists`);
+			console.error(`key_error:chart with the key ${chart.key} already exists, renaming to ${chart.key}_new`);
 			chart.key = chart.key + "_new";
 			this.add_chart(chart);
 		}
 		this.charts[chart.key] = chart;
+	}
+
+	extend_series(key, data) {
+		this.series[key].extend(data);
 	}
 
 	clear_series() {
@@ -187,6 +191,16 @@ class Series {
 			return [-1, 1];
 		}
 		return d3.extent(this.data);
+	}
+
+	extend(data) {
+		this.data = this.data.concat(data);
+		return this;
+	}
+
+	append(data) {
+		this.data.push(data);
+		return this;
 	}
 }
 
