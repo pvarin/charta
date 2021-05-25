@@ -57,12 +57,12 @@ socket.onmessage = function(e) {
 };
 
 window.onload = function() {
-    // Try loading data from local storage.	
+    // Try loading data from local storage.
     let context = window.localStorage.getItem("context");
     if (context === null) {
         global_state = new Context();
     } else {
-        global_state = Context.from_obj(context);
+        global_state = Context.from_obj(JSON.parse(context));
     }
     update_charts(d3.select("#charts"), global_state.chart_list());
     update_series(d3.select("#series"), global_state.series_list());

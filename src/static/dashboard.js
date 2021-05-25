@@ -130,18 +130,18 @@ function update_series(selection, series) {
         selection = d3.select("#series");
     }
     if (arguments.length < 2) {
-        series = global_state.series;
+        series = global_state.series_list();
     }
     divs = selection.selectAll("div")
-        .data(Object.keys(series));
+        .data(series);
 
     let new_divs = divs.enter()
         .append("div")
         .classed("series-item", true);
 
     new_divs.merge(divs)
-        .attr("title", d => d)
-        .text(d => d);
+        .attr("title", d => d.key)
+        .text(d => d.key);
 
     return selection;
 }
@@ -150,10 +150,10 @@ class Context {
     static from_obj(obj) {
         let ctx = new Context();
         for (const key in obj.series) {
-            ctx.series[key] = Series.from_obj(obj.series[key]);
+            ctx.series[key] = Series.from_obj(obj["series"][key]);
         }
         for (const key in obj.charts) {
-            ctx.charts[key] = Chart.from_obj(obj.series[key]);
+            ctx.charts[key] = Chart.from_obj(obj["charts"][key]);
         }
         return ctx;
     }
