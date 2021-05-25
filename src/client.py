@@ -48,8 +48,22 @@ if __name__ == "__main__":
     Dashboard.default().add_series(Series("y1", y1))
     Dashboard.default().add_series(Series("y2", y2))
     Dashboard.default().add_series(Series("y3", y3))
+    Dashboard.default().add_series(
+        Series(
+            "thisisareallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylongname",
+            y3))
+    for i in range(50):
+        Dashboard.default().add_series(
+            Series(f"example_{i}", np.linspace(0, 1)))
     Dashboard.default().add_chart(Chart("chart1", [["x", "y1"], ["x", "y2"]]))
     Dashboard.default().add_chart(Chart("chart2", [["y2", "y3"]]))
+    Dashboard.default().add_chart(Chart("chart3", [["y2", "y3"]]))
+    Dashboard.default().add_chart(Chart("chart4", [["y2", "y3"]]))
+    Dashboard.default().add_chart(Chart("chart5", [["y2", "y3"]]))
+    Dashboard.default().add_chart(Chart("chart6", [["y2", "y3"]]))
+    Dashboard.default().add_chart(Chart("chart7", [["y2", "y3"]]))
+    Dashboard.default().add_chart(Chart("chart8", [["y2", "y3"]]))
+    Dashboard.default().add_chart(Chart("chart9", [["y2", "y3"]]))
 
     x_new = np.linspace(1.1, 2.0)
     y1_new = np.sin(np.pi * x_new)

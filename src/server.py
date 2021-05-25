@@ -94,6 +94,7 @@ def try_listen(app, port_range):
         try:
             app.listen(port)
             print("web port: {}".format(port))
+            print(f"http://localhost:{port}")
             return port
         except OSError as e:
             error = e
