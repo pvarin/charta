@@ -139,8 +139,11 @@ function update_series(selection, series) {
         .append("div")
         .classed("series-item", true);
 
+    new_divs.append("p");
+
     new_divs.merge(divs)
         .attr("title", d => d.key)
+        .select("p")
         .text(d => d.key);
 
     return selection;
