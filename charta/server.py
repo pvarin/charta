@@ -8,7 +8,7 @@ import tornado.httpserver
 import zmq
 from zmq.eventloop import zmqstream
 
-from common import DEFAULT_WEB_PORT, DEFAULT_ZMQ_PORT
+from charta.common import DEFAULT_WEB_PORT, DEFAULT_ZMQ_PORT
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -67,8 +67,8 @@ def setup_client(app, port=DEFAULT_ZMQ_PORT):
     context = zmq.Context()
     socket = context.socket(zmq.REP)
     socket.connect("{protocol}://{host}:{port}".format(protocol="tcp",
-                                                       host="localhost",
-                                                       port=port))
+        host="localhost",
+        port=port))
     print("zmq port: {port}".format(port=port))
     stream = zmqstream.ZMQStream(socket)
     stream.on_recv_stream(handle_zmq_message)
@@ -83,8 +83,8 @@ def make_app():
         (r"/(.*)", tornado.web.StaticFileHandler, {
             "path": os.path.join(root, "static"),
             "default_filename": "index.html"
-        }),
-    ])
+            }),
+        ])
     return app
 
 
@@ -100,11 +100,3 @@ def try_listen(app, port_range):
             error = e
     raise error
 
-
-if __name__ == "__main__":
-    app = make_app()
-    http_server = tornado.httpserver.HTTPServer(app)
-    port = try_listen(http_server,
-                      range(DEFAULT_WEB_PORT, DEFAULT_WEB_PORT + 10))
-    setup_client(http_server, DEFAULT_ZMQ_PORT)
-    tornado.ioloop.IOLoop.current().start()
