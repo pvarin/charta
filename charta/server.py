@@ -89,6 +89,7 @@ def make_app():
 
 
 def try_listen(app, port_range):
+    assert len(port_range) > 0, "Argument port_range must have non-zero length."
     error = None
     for port in port_range:
         try:

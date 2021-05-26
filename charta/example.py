@@ -7,7 +7,7 @@ y2 = np.sin(2 * np.pi * x)
 y3 = np.sin(3 * np.pi * x)
 
 # Clear all of the plots and data.
-dahs = Dashboard.default()
+dash = Dashboard.default()
 dash.reset()
 
 # Add some series.
