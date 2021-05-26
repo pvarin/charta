@@ -1,16 +1,20 @@
 function update_charts(charts_container, data) {
+    if (arguments.length < 1){
+        charts_container = d3.select("#charts");
+    }
+    if (arguments.length < 2){
+        data = global_state.chart_list();
+    }
 
     if (data.length > 0) {
         charts_container.select(".no_charts").style("display", "none");
     } else {
         charts_container.select(".no_charts").style("display", null);
-
     }
 
     let charts = charts_container
         .selectAll("div.chart")
         .data(data, d => d.key);
-
 
     let new_charts = charts.enter()
         .append("div").classed("chart", true);
@@ -27,11 +31,11 @@ function update_charts(charts_container, data) {
         .attr("fill", "steelblue")
         .attr("opacity", 0.0);
 
-    let all_charts = new_charts.merge(charts)
+    new_charts.merge(charts)
         .attr("id", d => d.key)
         .each(d => update_chart(d));
 
-    all_charts.exit().remove();
+    charts.exit().remove();
 }
 
 function line_key(chart_key, x_key, y_key) {
@@ -42,6 +46,12 @@ function update_chart(chart) {
     let x_scale = chart.x_scale();
     let y_scale = chart.y_scale();
     let chart_div = d3.select("#" + chart.key);
+
+    filter_fn = function (series){
+        return (series[0] in global_state.series) && (series[1] in global_state.series);
+    }
+
+    chart.series = chart.series.filter(filter_fn);
 
     // Define clipping window
     chart_div.select(`#${chart.key}-graph-window`)
@@ -84,8 +94,9 @@ function update_chart(chart) {
     new_lines.append("path");
 
     new_lines.merge(lines)
-        .each(d => update_line(chart, d[0], d[1], x_scale, y_scale))
-        .exit()
+        .each(d => update_line(chart, d[0], d[1], x_scale, y_scale));
+
+    lines.exit()
         .remove();
 }
 
@@ -146,6 +157,7 @@ function update_series(selection, series) {
         .select("p")
         .text(d => d.key);
 
+    divs.exit().remove();
     return selection;
 }
 
@@ -189,6 +201,9 @@ class Context {
 
     clear_series() {
         this.series = {};
+        for (const chart_key in this.charts) {
+            this.charts[chart_key].series = this.charts[chart_key].series.filter(s => s[0] in this.series && s[1] in this.series);
+        }
     }
 
     clear_charts() {

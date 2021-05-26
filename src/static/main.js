@@ -20,13 +20,20 @@ function handle_data(method, msg) {
             "data": JSON.stringify(global_state)
         }));
     } else if (method == "create_series") {
-        Series.from_obj(msg.data);
+        if (Array.isArray(msg.data)){
+            msg.data.forEach(Series.from_obj);
+        }else{
+            Series.from_obj(msg.data);
+        }
         update_series();
     } else if (method == "create_chart") {
-        global_state.add_chart(Chart.from_obj(msg.data));
+        if (Array.isArray(msg.data)){
+            msg.data.forEach(d => global_state.add_chart(Chart.from_obj(d)));
+        }else{
+            global_state.add_chart(Chart.from_obj(msg.data));
+        }
         update_charts(d3.select("#charts"), global_state.chart_list());
     } else if (method == "extend_series") {
-        console.log(msg);
         global_state.extend_series(msg.key, msg.data);
     } else if (method == "update") {
         update_charts(d3.select("#charts"), global_state.chart_list());
