@@ -4,11 +4,11 @@ body {
     font-weight: 50;
 }
 
-.grid-container h1,
-.grid-container h2,
-.grid-container h3,
-.grid-container h4,
-.grid-container h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
     font-weight: 50;
 }
 
