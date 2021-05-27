@@ -3,6 +3,7 @@ import time
 
 from charta.common import DEFAULT_ZMQ_PORT
 
+
 def send_data(method, protocol="tcp", port=DEFAULT_ZMQ_PORT, **kwargs):
     with zmq.Context().socket(zmq.REQ) as socket:
         socket.bind("tcp://*:{port}".format(protocol=protocol, port=port))
@@ -58,4 +59,3 @@ class Dashboard:
 
     def delete_series(self):
         self.send_data("delete_series")
-

@@ -1,8 +1,8 @@
 function update_charts(charts_container, data) {
-    if (arguments.length < 1){
+    if (arguments.length < 1) {
         charts_container = d3.select("#charts");
     }
-    if (arguments.length < 2){
+    if (arguments.length < 2) {
         data = global_state.chart_list();
     }
 
@@ -47,7 +47,7 @@ function update_chart(chart) {
     let y_scale = chart.y_scale();
     let chart_div = d3.select("#" + chart.key);
 
-    filter_fn = function (series){
+    filter_fn = function(series) {
         return (series[0] in global_state.series) && (series[1] in global_state.series);
     }
 
@@ -119,15 +119,19 @@ function update_line(chart, x_series, y_series, x_scale, y_scale) {
     // Add the circles
     let circles = g_series.selectAll("circle")
         .data(data);
-    circles.enter()
+
+    let new_circles = circles.enter()
         .append("circle")
         .attr("fill", "white")
         .attr("stroke", "steelblue")
-        .attr("stroke-width", 2)
-        .merge(circles)
+        .attr("stroke-width", 2);
+
+    new_circles.merge(circles)
         .attr("cx", d => d[0])
         .attr("cy", d => d[1])
         .attr("r", 2);
+
+    circles.exit().remove();
 }
 
 var global_state = {
@@ -188,11 +192,12 @@ class Context {
 
     add_chart(chart) {
         if (this.charts.hasOwnProperty(chart.key)) {
-            console.error(`key_error:chart with the key ${chart.key} already exists, renaming to ${chart.key}_new`);
-            chart.key = chart.key + "_new";
-            this.add_chart(chart);
+            this.charts[chart.key].update(chart);
+            console.log(this.charts[chart.key]);
+        } else {
+            this.charts[chart.key] = chart;
+
         }
-        this.charts[chart.key] = chart;
     }
 
     extend_series(key, data) {
@@ -268,6 +273,12 @@ class Chart {
         this.key = key;
         this.series = series;
         this.visual = new ChartVisual();
+    }
+
+    update(other) {
+        this.series.push(...other.series);
+        console.log(this);
+        return this;
     }
 
     x_scale() {
